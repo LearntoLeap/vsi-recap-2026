@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Recap tương tác hành trình Viet Startup INTERchange 2026 Thượng Hải – Tô Châu">
+<style>body{margin:0;font:14px system-ui}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Hành trình VSI 2026</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;800&display=swap">
+<style>
+/* Layout: MỘT trang bản đồ toàn màn hình. Welcome là lớp phủ trên map; máy bay bay vào map; bus chạy liên tục giữa các điểm; panel recap trượt vào từ phải (dưới ở mobile). */
+:root{
+  --red:#C8102E; --navy:#1B2A5B; --green:#1E9E5A; --pink:#F6A6B8; --pinkbg:#FBE4EA;
+  --yellow:#F7C325; --yellow-dk:#D9A207;
+  --bg:#F3F7FE; --paper:#FFFFFF; --ink:#1B2A5B; --muted:#5A6684; --line:#DCE3F0; --sea:#CFE3F7;
+  --font:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:var(--font);color:var(--ink);background:var(--bg);overflow:hidden}
+button{font:inherit}
+.gutter{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#app{height:100%;display:flex;flex-direction:column}
+
+/* ---------- Top bar ---------- */
+.topbar{display:flex;align-items:center;gap:12px;padding-block:8px;flex-wrap:wrap;border-bottom:1px solid var(--line);background:rgba(255,255,255,.7);backdrop-filter:blur(8px);z-index:5}
+.topbar .title{font-weight:800;font-size:15px;color:var(--navy);white-space:nowrap;line-height:1.1}
+.topbar .title small{display:block;font-weight:600;font-size:10px;color:var(--red);letter-spacing:.14em}
+.org{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.logo-bambu{display:inline-flex;align-items:center;gap:5px;font-weight:800;font-size:14px;color:var(--navy);letter-spacing:0;text-transform:none}
+.logo-bambu i{display:inline-block;width:18px;height:18px;background:
+  linear-gradient(var(--green),var(--green)) 1px 3px/3px 14px no-repeat,
+  linear-gradient(var(--green),var(--green)) 7px 0/3px 18px no-repeat,
+  linear-gradient(var(--green),var(--green)) 13px 3px/3px 14px no-repeat}
+.logo-bambu b{color:var(--green)}
+.logo-sce{font-weight:800;font-size:17px;letter-spacing:-.02em;color:var(--navy);text-transform:none}
+.logo-sce span{color:var(--red)}
+.days{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.day{border:1.5px solid var(--line);background:var(--paper);color:var(--muted);border-radius:999px;padding:5px 11px;font-weight:700;font-size:12px;cursor:pointer;transition:transform .15s,background .2s,color .2s,border-color .2s}
+.day:hover{border-color:var(--navy);color:var(--navy);transform:translateY(-2px)}
+.day.visited{border-color:var(--green);color:var(--green)}
+.day.active{background:var(--navy);border-color:var(--navy);color:#fff;animation:pop .35s}
+.day.special::after{content:"🌸";margin-left:4px}
+.day:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+@keyframes pop{0%{transform:scale(.8)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+
+/* ---------- Stage ---------- */
+.stage{flex:1;min-height:0;position:relative;overflow:hidden}
+.stage{--pw:min(400px,42%)}
+.stage svg{width:100%;height:100%;display:block}
+.status{position:absolute;left:12px;bottom:12px;background:var(--paper);border:1.5px solid var(--line);border-radius:12px;padding:8px 12px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(27,42,91,.08);z-index:3;max-width:min(70%,420px)}
+.status .dot{width:10px;height:10px;border-radius:50%;background:var(--yellow);box-shadow:0 0 0 3px rgba(247,195,37,.3);flex:none}
+.status.moving .dot{animation:blink .5s infinite alternate}
+@keyframes blink{to{opacity:.3;transform:scale(.7)}}
+.hint{position:absolute;right:12px;bottom:12px;font-size:11px;color:var(--muted);background:rgba(255,255,255,.8);padding:6px 10px;border-radius:999px;z-index:3}
+
+/* ---------- Welcome overlay ---------- */
+#welcome{position:absolute;inset:0;display:grid;place-items:center;background:rgba(243,247,254,.55);backdrop-filter:blur(6px);z-index:10;transition:opacity .7s,transform .7s;overflow:auto;padding:16px}
+#welcome.gone{opacity:0;transform:scale(1.08);pointer-events:none}
+.card{background:rgba(255,255,255,.92);border:1.5px solid #fff;border-radius:28px;padding:28px 26px;max-width:720px;width:100%;text-align:center;display:flex;flex-direction:column;gap:14px;box-shadow:0 30px 80px rgba(27,42,91,.18);position:relative;animation:cardIn .9s cubic-bezier(.2,.9,.3,1.2) both}
+@keyframes cardIn{from{opacity:0;transform:translateY(40px) scale(.94)}}
+.hdf{font-weight:800;color:var(--red);letter-spacing:.08em;font-size:12px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.card h1{margin:0;font-weight:800;line-height:1.08;text-wrap:balance;font-size:clamp(24px,4.2vw,44px)}
+.card h1 .l1{display:block;color:var(--red);font-weight:400;font-size:.7em}
+.card h1 .l2{display:block;color:var(--navy)}
+.card p{max-width:46ch;margin:0 auto;color:var(--muted);font-size:15px;line-height:1.55}
+.chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.chip{padding:5px 13px;border-radius:999px;font-weight:700;font-size:13px;color:#fff}
+.chip.red{background:var(--red)} .chip.green{background:var(--green)} .chip.pale{background:#C7D7F4;color:var(--navy)}
+.delegation{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-height:160px;overflow:auto;padding:4px}
+.badge{width:72px;border-radius:12px;background:var(--paper);border:1.5px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;color:var(--navy);box-shadow:0 4px 12px rgba(27,42,91,.08);animation:bob 2.4s ease-in-out infinite}
+.badge b{font-size:13px;font-weight:800}
+.badge img{width:58px;height:30px;object-fit:contain;display:block;border-radius:4px;background:#fff}
+.badge.ltl{background:var(--paper);border-color:var(--pink)}
+.badge.ltl span{color:var(--red)}
+.badge span{font-size:8.5px;font-weight:600;color:var(--muted);line-height:1.1;text-align:center;max-width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.badge.ltl span{color:#C7D7F4}
+.badge:nth-child(odd){animation-delay:-1.2s}
+.badge.ltl{background:var(--navy);color:#fff;border-color:var(--navy)}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-6px) rotate(2deg)}}
+.small{font-size:11px;color:var(--muted)}
+.btn{border:0;cursor:pointer;border-radius:999px;padding:13px 26px;font-weight:700;font-size:15px;color:#fff;background:var(--navy);box-shadow:0 8px 24px rgba(27,42,91,.25);transition:transform .15s;align-self:center}
+.btn:hover{transform:translateY(-2px) scale(1.03)} .btn:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
+.btn.ghost{background:transparent;color:var(--navy);box-shadow:none;border:2px solid var(--navy)}
+.btn.go{animation:wiggle 1.6s ease-in-out infinite}
+@keyframes wiggle{0%,100%{transform:rotate(0)}10%{transform:rotate(-3deg) scale(1.04)}20%{transform:rotate(3deg) scale(1.04)}30%{transform:rotate(0)}}
+.stamp{position:absolute;right:-14px;top:-18px;width:88px;height:88px;border-radius:50%;background:var(--pink);display:grid;place-items:center;transform:rotate(-12deg);box-shadow:0 6px 20px rgba(200,16,46,.15);animation:spin 30s linear infinite}
+@keyframes spin{to{transform:rotate(348deg)}}
+.stamp svg{width:88px;height:88px}
+
+.panel{position:absolute;top:12px;right:12px;bottom:12px;width:min(400px,42%);background:var(--paper);border:1.5px solid var(--line);border-radius:20px;box-shadow:0 20px 50px rgba(27,42,91,.16);overflow:auto;z-index:4;transform:translateX(calc(100% + 24px));transition:transform .55s cubic-bezier(.2,.9,.3,1.1);display:flex;flex-direction:column}
+.panel.open{transform:none}
+.panel-in{padding:18px;display:flex;flex-direction:column;gap:12px;min-height:100%}
+.panel .close{position:absolute;top:10px;right:10px;border:0;background:var(--bg);width:30px;height:30px;border-radius:50%;cursor:pointer;color:var(--muted);font-weight:800}
+.meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding-right:32px}
+.pill{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:999px}
+.pill.d{background:var(--green);color:#fff} .pill.city{background:#E7EEFB;color:var(--navy)} .pill.tag{background:var(--pinkbg);color:var(--red)}
+.panel h2{margin:0;font-size:20px;line-height:1.2;color:var(--navy);text-wrap:balance}
+.addr{font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:flex-start}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line)}
+.tab{border:0;background:none;padding:8px 10px;font-weight:700;font-size:13px;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer}
+.tab.active{color:var(--navy);border-color:var(--red)} .tab.special.active{color:var(--red)}
+.tab:focus-visible{outline:3px solid var(--yellow)}
+.pane{display:none;flex-direction:column;gap:10px;animation:fadeUp .4s both}
+.pane.active{display:flex}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}}
+.recap{font-size:14px;line-height:1.6;color:#2C3858}
+.recap ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.sect{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fff;padding:5px 10px;border-radius:999px;display:inline-block;margin:6px 0 8px}
+.sect.navy{background:var(--navy)} .sect.green{background:var(--green)}
+.photo:has(img){aspect-ratio:auto;border-style:solid;padding:0;display:block}
+.photo:has(img) img{height:auto;max-height:420px;object-fit:contain;background:#DCEBFA}
+.placeholder{border:1.5px dashed var(--line);border-radius:12px;padding:14px;color:var(--muted);font-size:13px;background:var(--bg)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:8px;margin-bottom:10px}
+.stat{background:#EEF3FC;border-radius:10px;padding:8px 10px;animation:fadeUp .5s both}
+.stat:nth-child(2){animation-delay:.1s}.stat:nth-child(3){animation-delay:.2s}
+.stat b{display:block;font-size:18px;color:var(--red);font-variant-numeric:tabular-nums}
+.stat span{font-size:11px;color:var(--muted);line-height:1.3;display:block}
+.photo{aspect-ratio:4/3;max-width:100%;border-radius:14px;overflow:hidden;background:#DCEBFA;display:grid;place-items:center;border:1.5px dashed #9FB6DC;color:var(--navy);text-align:center;padding:16px;transform:rotate(-1.5deg);box-shadow:0 8px 20px rgba(27,42,91,.12)}
+.photo img{width:100%;height:100%;object-fit:cover;display:block}
+.photo .ico{font-size:34px;line-height:1}
+.photo small{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.photo.special{background:var(--pinkbg);border-color:var(--pink);transform:rotate(1.5deg)}
+.caption{font-size:12px;color:var(--muted);text-align:center}
+.nav{display:flex;gap:8px;margin-top:auto;padding-top:8px}
+.nav .btn{flex:1;padding:10px 12px;font-size:13px}
+.nav .btn:disabled{opacity:.4;cursor:default;transform:none}
+
+/* ---------- Footer ---------- */
+.footer{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-block:7px;background:var(--navy);color:#fff;font-size:11px;flex-wrap:wrap}
+.footer b{font-size:13px} .footer .slogan{color:var(--pink);font-weight:600}
+.footer .cities{display:flex;gap:6px}
+.footer .cities span{padding:3px 10px;border-radius:999px;font-weight:700}
+.footer .cities .sh{background:var(--green)} .footer .cities .sz{background:#8FB0E8;color:var(--navy)}
+
+/* ---------- SVG styling ---------- */
+.stop{cursor:pointer;transform-box:fill-box;transform-origin:center}
+.stop .ring{fill:var(--paper);stroke:var(--line);stroke-width:2;transition:stroke .2s}
+.stop:hover .ring{stroke:var(--navy)}
+.stop.active .ring{stroke:var(--red);stroke-width:3}
+.stop.visited .ring{stroke:var(--green)}
+.stop .lbl{font-family:var(--font);font-size:11px;font-weight:700;fill:var(--navy);pointer-events:none}
+.stop .sub{font-family:var(--font);font-size:9px;fill:var(--muted);pointer-events:none}
+.stop .ini{font-family:var(--font);font-size:11px;font-weight:800;fill:var(--navy);text-anchor:middle;pointer-events:none}
+.stop .num{font-family:var(--font);font-size:9px;font-weight:800;fill:#fff;text-anchor:middle;pointer-events:none}
+.stop .numbg{fill:var(--navy)} .stop.special .numbg{fill:var(--red)}
+.stop .check{opacity:0;transition:opacity .3s}
+.stop.visited .check{opacity:1}
+.stop.hidden{opacity:0}
+.stop.in{animation:stopIn .6s cubic-bezier(.2,.9,.3,1.4) both}
+@keyframes stopIn{from{opacity:0;transform:scale(.2)}}
+.stop.next .ring{animation:ringPulse 1.4s ease-out infinite}
+@keyframes ringPulse{0%{stroke:var(--yellow);stroke-width:3}100%{stroke:var(--yellow);stroke-width:14;stroke-opacity:0}}
+.stop.hop{animation:hop .5s}
+@keyframes hop{30%{transform:translateY(-10px) scale(1.15)}60%{transform:translateY(0) scale(.95)}}
+.route{fill:none;stroke:#9FB6DC;stroke-width:3;stroke-dasharray:6 7;stroke-linecap:round;animation:dash 1.2s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-13}}
+.route.done{stroke:var(--green);stroke-dasharray:none;animation:none}
+.route.live{stroke:var(--yellow);stroke-dasharray:none;animation:none}
+.city{font-family:var(--font);font-weight:800;fill:var(--navy);opacity:.9}
+.citysub{font-family:var(--font);font-size:11px;fill:var(--muted);letter-spacing:.14em}
+.ripple{fill:none;stroke:var(--green);stroke-width:3;animation:ripple .9s ease-out forwards;pointer-events:none}
+@keyframes ripple{from{r:10;opacity:1}to{r:60;opacity:0}}
+.puff{fill:#B9C6DC;opacity:.7;animation:puff .9s ease-out forwards;pointer-events:none}
+@keyframes puff{to{transform:translate(-18px,-14px) scale(2.6);opacity:0}}
+.confetti{animation:conf 1.4s cubic-bezier(.2,.7,.4,1) forwards;pointer-events:none}
+@keyframes conf{to{transform:translate(var(--dx),var(--dy)) rotate(540deg);opacity:0}}
+.petal{fill:var(--pink);animation:petal 4s linear forwards;pointer-events:none}
+@keyframes petal{0%{transform:translateY(-40px) rotate(0)}100%{transform:translateY(760px) rotate(720deg) translateX(60px);opacity:0}}
+.cloud{animation:drift linear infinite}
+@keyframes drift{from{transform:translateX(-200px)}to{transform:translateX(1400px)}}
+.wave{animation:wave 3s ease-in-out infinite}
+@keyframes wave{50%{transform:translateY(3px)}}
+#bus{transition:opacity .4s}
+#plane{opacity:0}
+
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important}.panel{transition:none}}
+@media (max-width:760px){
+  .panel{top:auto;left:12px;right:12px;bottom:12px;width:auto;max-height:55%;transform:translateY(calc(100% + 24px))}
+  .panel.open{transform:none}
+  .status{max-width:60%}
+  .topbar .org{display:none}
+  .hint{display:none}
+}
+</style>
+
+<div id="app">
+  <div class="topbar gutter">
+    <div class="org">Organized by <span class="logo-bambu"><i></i>Bambu<b>UP</b></span></div>
+    <div class="title">Viet Startup INTERchange 2026<small>CONNECT · EXPLORE · GROW</small></div>
+    <div class="org">Hosted by <span class="logo-sce">S<span>C</span>E</span></div>
+    <div class="days" id="days" role="tablist" aria-label="Chọn ngày"></div>
+  </div>
+
+  <div class="stage">
+    <svg id="mapSvg" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid meet" aria-label="Bản đồ hành trình Thượng Hải – Tô Châu">
+      <defs>
+        <pattern id="dots" width="26" height="26" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.3" fill="#9FB6DC" opacity=".5"/></pattern>
+        <filter id="sh" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#1B2A5B" flood-opacity=".22"/></filter>
+        <linearGradient id="landg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F7FAFE"/><stop offset="1" stop-color="#EEF4FC"/></linearGradient>
+      </defs>
+      <rect width="1200" height="700" fill="url(#landg)"/>
+      <rect width="1200" height="700" fill="url(#dots)"/>
+      <!-- Water -->
+      <g class="wave"><ellipse cx="70" cy="430" rx="130" ry="160" fill="#CFE3F7"/>
+      <path d="M900,0 C 860,120 940,220 1010,330 C 1080,440 1130,520 1200,560 L1200,0 Z" fill="#CFE3F7"/>
+      <path d="M0,0 L1200,0 L1200,60 C 900,100 600,60 300,110 C 150,130 60,110 0,80 Z" fill="#CFE3F7"/>
+      <path d="M980,330 C 930,380 900,430 920,480 C 940,530 880,600 870,700" fill="none" stroke="#B9D3F0" stroke-width="14" stroke-linecap="round"/></g>
+      <path d="M240,470 L470,470 M330,380 L330,560" stroke="#B9D3F0" stroke-width="6" stroke-linecap="round" opacity=".7"/>
+      <path d="M420,520 C 560,520 640,470 740,450 C 820,435 860,400 900,400" fill="none" stroke="#E4EAF5" stroke-width="18" stroke-linecap="round"/>
+      <!-- Clouds -->
+      <g opacity=".55" fill="#fff">
+        <g class="cloud" style="animation-duration:70s"><ellipse cx="0" cy="120" rx="46" ry="16"/><ellipse cx="30" cy="112" rx="30" ry="18"/></g>
+        <g class="cloud" style="animation-duration:95s;animation-delay:-40s"><ellipse cx="0" cy="620" rx="60" ry="18"/><ellipse cx="40" cy="610" rx="36" ry="20"/></g>
+        <g class="cloud" style="animation-duration:120s;animation-delay:-70s"><ellipse cx="0" cy="330" rx="40" ry="14"/><ellipse cx="26" cy="322" rx="26" ry="16"/></g>
+      </g>
+      <!-- City labels -->
+      <text class="city" x="150" y="330" font-size="30">TÔ CHÂU</text><text class="citysub" x="152" y="350">SUZHOU</text>
+      <text class="city" x="880" y="300" font-size="30">THƯỢNG HẢI</text><text class="citysub" x="882" y="320">SHANGHAI</text>
+      <text class="city" x="560" y="200" font-size="16" opacity=".7">THÁI THƯƠNG</text><text class="citysub" x="562" y="216">TAICANG</text>
+      <!-- skyline near Shanghai -->
+      <g transform="translate(1040 250)" fill="#1B2A5B" opacity=".35"><rect x="0" y="50" width="12" height="40"/><rect x="16" y="20" width="10" height="70"/><circle cx="21" cy="12" r="6"/><rect x="30" y="35" width="14" height="55"/><rect x="48" y="55" width="10" height="35"/><rect x="62" y="30" width="12" height="60"/></g>
+      <!-- pagoda near Suzhou -->
+      <g transform="translate(200 390)" fill="#1B2A5B" opacity=".35"><path d="M0,40 L30,40 L26,30 L4,30 Z M3,30 L27,30 L23,20 L7,20 Z M6,20 L24,20 L20,10 L10,10 Z M12,10 L18,10 L15,0 Z"/></g>
+      <!-- Hà Nội off-map hint -->
+      <g transform="translate(40 600)"><circle r="7" fill="#C8102E"/><text x="14" y="4" font-family="Be Vietnam Pro,sans-serif" font-size="12" font-weight="800" fill="#1B2A5B">← HÀ NỘI · 18/10</text></g>
+      <path id="flightArc" d="M-80,760 Q 500,150 1060,470" fill="none" stroke="#1B2A5B" stroke-width="2" stroke-dasharray="7 9" opacity="0"/>
+      <g id="routes"></g>
+      <g id="fx"></g>
+      <g id="stops"></g>
+      <g id="trail"></g>
+      <g id="bus" filter="url(#sh)" opacity="0">
+        <g id="busBob"><g id="busBody">
+          <rect x="-24" y="-13" width="48" height="26" rx="7" fill="#F7C325" stroke="#D9A207" stroke-width="1.5"/>
+          <rect x="-18" y="-8" width="9" height="8" rx="2" fill="#DCEBFA"/><rect x="-6" y="-8" width="9" height="8" rx="2" fill="#DCEBFA"/><rect x="6" y="-8" width="9" height="8" rx="2" fill="#DCEBFA"/>
+          <rect x="-24" y="3" width="48" height="3" fill="#1B2A5B" opacity=".5"/>
+          <text x="0" y="11" font-size="5" font-weight="800" font-family="Be Vietnam Pro,sans-serif" fill="#1B2A5B" text-anchor="middle">VSI 2026</text>
+          <circle cx="22" cy="-4" r="2" fill="#fff"/>
+          <g id="w1" transform="translate(-13 14)"><circle r="4.5" fill="#1B2A5B"/><path d="M-3,0 H3 M0,-3 V3" stroke="#F7C325" stroke-width="1.2"/></g>
+          <g id="w2" transform="translate(13 14)"><circle r="4.5" fill="#1B2A5B"/><path d="M-3,0 H3 M0,-3 V3" stroke="#F7C325" stroke-width="1.2"/></g>
+        </g></g>
+      </g>
+      <g id="plane">
+        <g id="planeBody">
+          <path d="M-22,0 L10,-4 L26,0 L10,4 Z" fill="#1B2A5B"/>
+          <path d="M-6,-1 L-14,-18 L-8,-18 L4,-2 Z" fill="#C8102E"/>
+          <path d="M-6,1 L-14,18 L-8,18 L4,2 Z" fill="#C8102E"/>
+          <path d="M-20,-1 L-26,-8 L-22,-8 L-15,-1 Z" fill="#1E9E5A"/>
+          <circle cx="12" cy="0" r="2" fill="#fff"/>
+        </g>
+      </g>
+    </svg>
+    <div class="status" id="status"><span class="dot"></span><span id="statusTxt">Chuẩn bị khởi hành từ Hà Nội…</span></div>
+    <div class="hint">Bấm vào điểm trên bản đồ hoặc dùng phím ← →</div>
+
+    <aside class="panel" id="panel" aria-live="polite"></aside>
+
+    <div id="welcome">
+      <div class="card">
+        <div class="stamp" aria-hidden="true">
+          <svg viewBox="0 0 96 96"><defs><path id="circ" d="M48,48 m-34,0 a34,34 0 1,1 68,0 a34,34 0 1,1 -68,0"/></defs>
+            <text font-family="Be Vietnam Pro,sans-serif" font-size="8.5" font-weight="700" fill="#C8102E" letter-spacing="1.6"><textPath href="#circ">SHANGHAI · SUZHOU · THƯỢNG HẢI · TÔ CHÂU ·</textPath></text>
+            <g transform="translate(48 48)"><circle cx="0" cy="-10" r="6" fill="#C8102E"/><circle cx="9.5" cy="-3" r="6" fill="#C8102E"/><circle cx="6" cy="8" r="6" fill="#C8102E"/><circle cx="-6" cy="8" r="6" fill="#C8102E"/><circle cx="-9.5" cy="-3" r="6" fill="#C8102E"/><circle r="3" fill="#F6A6B8"/></g>
+          </svg>
+        </div>
+        <div class="hdf">HANOI DEPARTMENT OF FINANCE</div>
+        <div class="eyebrow">Viet Startup INTERchange 2026 · 18–23/10/2026</div>
+        <h1><span class="l1">Chào mừng các doanh nghiệp đến với</span><span class="l2">Hành trình Viet Startup INTERchange 2026<br>Thượng Hải – Tô Châu</span></h1>
+        <p>Cùng nhìn lại 6 ngày Connect · Explore · Grow của Đoàn doanh nghiệp khởi nghiệp sáng tạo Hà Nội tại Trung Quốc.</p>
+        <div class="chips"><span class="chip red">2026</span><span class="chip green">Shanghai</span><span class="chip pale">Suzhou</span></div>
+        <div class="delegation" id="delegation" aria-label="Các doanh nghiệp tham gia"></div>
+        <div class="small">27 doanh nghiệp khởi nghiệp sáng tạo Hà Nội · logo theo VSIC 2026 Digital Catalogue</div>
+        <button class="btn go" id="btnStart">Cất cánh từ Hà Nội ✈</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer gutter">
+    <div><b>Viet Startup INTERchange 2026</b> · <span class="slogan">Connect · Explore · Grow</span></div>
+    <div class="cities"><span class="sh">Shanghai</span><span class="sz">Suzhou</span></div>
+    <div>bambuup.com · (+84) 386 011 925</div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   DỮ LIỆU — thay nội dung tại đây.
+   recap: mảng gạch đầu dòng (rỗng = placeholder). photo: đường dẫn ảnh hoặc data URI; null = placeholder.
+   ===================================================================== */
+const DELEGATION = [
+  {name:"Learn to Leap", ini:"LtL", ltl:true, logo:"photos/logos/ltl.png"},
+  {name:"XRTECH", ini:"XR", logo:"photos/logos/xrtech.png"},{name:"BII", ini:"BII", logo:"photos/logos/bii.png"},
+  {name:"VBRAIN", ini:"VB", logo:"photos/logos/vbrain.png"},{name:"AALAB", ini:"AA", logo:"photos/logos/aalab.png"},
+  {name:"Cùng Chat", ini:"CC", logo:"photos/logos/cungchat.png"},{name:"SICIX", ini:"SX", logo:"photos/logos/sicix.png"},
+  {name:"MIGI", ini:"MG", logo:"photos/logos/migi.png"},{name:"Vinasources", ini:"VS", logo:"photos/logos/vinasources.png"},
+  {name:"POMA", ini:"PM", logo:"photos/logos/poma.png"},{name:"ATP Vietnam", ini:"ATP", logo:"photos/logos/atp.png"},
+  {name:"Agribeacon", ini:"AB", logo:"photos/logos/agribeacon.png"},{name:"Innovark", ini:"IV", logo:"photos/logos/innovark.png"},
+  {name:"Dayladau", ini:"DLD", logo:"photos/logos/dayladau.png"},{name:"FICAR", ini:"FC", logo:"photos/logos/ficar.png"},
+  {name:"RoboMinh", ini:"RM", logo:"photos/logos/robominh.png"},{name:"AIZ (PMAX)", ini:"AIZ", logo:"photos/logos/aiz.png"},
+  {name:"BlueOC", ini:"BOC", logo:"photos/logos/blueoc.png"},{name:"ESG Tech", ini:"ESG", logo:"photos/logos/esgtech.png"},
+  {name:"Etelecom", ini:"ET", logo:"photos/logos/etelecom.png"},{name:"Superb AI", ini:"SAI", logo:"photos/logos/superbai.png"},
+  {name:"Repio", ini:"RP", logo:"photos/logos/repio.png"},{name:"DXGlobal", ini:"DXG", logo:"photos/logos/dxglobal.png"},
+  {name:"TinkTalk", ini:"TT", logo:"photos/logos/tinktalk.png"},{name:"Pharaon (123 Work)", ini:"PH", logo:"photos/logos/pharaon.png"},
+  {name:"VDX", ini:"VDX", logo:"photos/logos/vdx.png"},{name:"ADT Hi-Tech", ini:"ADT", logo:"photos/logos/adt.png"},
+];
+const STOPS = [
+  {id:"pvg", day:1, date:"18/10", name:"Sân bay Quốc tế Phố Đông", short:"Phố Đông", ini:"PVG", city:"Thượng Hải", tags:["Hạ cánh"],
+   addr:"Pudong International Airport, Shanghai", x:1060, y:470,
+   recap:["Kick-off tại Hà Nội (16/10): Đoàn gặp mặt, phổ biến chương trình và lưu ý trước chuyến đi.","Chuyến bay HO1330 khởi hành 01:20 ngày 18/10, hạ cánh Phố Đông 05:35.","Khám phá Phố Cổ Thượng Hải, nhận phòng Shanghai Shaanxi Business Hotel."], photo:"photos/day0-kickoff.jpg", photoCaption:"Kick-off Đoàn VSIC 2026 tại Hà Nội, 16/10/2026"},
+  {id:"tlsq", day:2, date:"19/10", name:"Tổng Lãnh sự quán Việt Nam tại Thượng Hải", short:"TLSQ Việt Nam", ini:"VN", city:"Thượng Hải", tags:["Ngoại giao","Thương mại"],
+   addr:"Room 304, 3F, Huachen Financial Mansion, No. 900 Pudong Avenue, Pudong", x:960, y:400,
+   people:"Ông Trần Huy Hùng – Tổng Lãnh sự Việt Nam tại Thượng Hải",
+   recap:["Tiếp cận thị trường Trung Quốc đòi hỏi am hiểu thị trường, uy tín và mạng lưới đối tác bản địa, bên cạnh chất lượng công nghệ và sản phẩm.","Hệ sinh thái khởi nghiệp phát triển mạnh (Thượng Hải, Bắc Kinh, Thâm Quyến, Hàng Châu); AI tạo điều kiện cho mô hình khởi nghiệp tinh gọn, giảm chi phí gia nhập.","Hướng hợp tác tiềm năng Việt – Trung: du lịch thông minh, giáo dục – đào tạo, công nghệ ứng dụng."],
+   lessons:["<b>Chủ động xây dựng mạng lưới đối tác:</b> tận dụng cơ quan đại diện, hiệp hội doanh nghiệp và doanh nghiệp địa phương để tìm đối tác, cơ hội hợp tác.","<b>Chuẩn bị trước khi thâm nhập:</b> nghiên cứu nhu cầu khách hàng, rào cản pháp lý, phương thức kinh doanh và tiếng Trung; không chỉ dựa vào lợi thế sản phẩm.","<b>Khởi nghiệp tinh gọn:</b> ứng dụng AI giảm chi phí vận hành, thử nghiệm mô hình với đội nhỏ; tìm hiểu chương trình ươm tạo, hỗ trợ AI cho founder nước ngoài.","<b>Ưu tiên hướng kết nối hai thị trường:</b> du lịch thông minh, giáo dục và dịch vụ cho khách Trung Quốc tại Việt Nam."],
+   photo:"photos/day2-tlsq.jpg", photo2:"photos/day2-tlsq-aodai.jpg"},
+  {id:"jinjiang", day:2, date:"19/10", name:"Tập đoàn Khách sạn Jin Jiang", short:"Jin Jiang", ini:"JJ", city:"Thượng Hải", tags:["Hospitality","AI","Chuỗi cung ứng"],
+   addr:"No. 222 Longcao Road, Caohejing, Xuhui District", x:850, y:520,
+   people:"Harry Zhao · Eric Li · Rocky Liu",
+   recap:["AI tạo giá trị khi tích hợp vào quy trình và kho tri thức nghiệp vụ, thay vì là công cụ độc lập.","Nhân sự trực tiếp vận hành là nguồn quan trọng để xác định nhu cầu và phát triển ứng dụng AI phù hợp thực tế.","Lộ trình hiệu quả: tạo đồng thuận → khuyến khích nhân sự thử nghiệm → nhân rộng ứng dụng đã chứng minh hiệu quả.","Hệ sinh thái khách sạn – du lịch mở ra hướng kết nối về công nghệ vận hành, chuỗi cung ứng, du lịch và phát triển bền vững."],
+   lessons:["<b>Phát triển từ bài toán thực tế:</b> làm việc trực tiếp với người dùng để xác định điểm nghẽn vận hành trước khi xây dựng sản phẩm AI.","<b>Tập trung dữ liệu và tri thức chuyên ngành:</b> tận dụng mô hình AI có sẵn, đầu tư vào dữ liệu và quy trình đặc thù.","<b>Chứng minh hiệu quả trước khi mở rộng:</b> thử nghiệm quy mô nhỏ, đo mức tiết kiệm chi phí, thời gian, năng suất; chỉ nhân rộng khi có kết quả thực tế.","<b>Hợp tác với hệ sinh thái khách sạn:</b> quản lý vận hành, đào tạo nhân sự, chuỗi cung ứng, giảm nhựa dùng một lần, tái chế; cơ hội mở rộng khi Jin Jiang vào Việt Nam và Đông Nam Á."],
+   photo:"photos/day2-jinjiang.jpg"},
+  {id:"alibaba", day:2, date:"19/10", name:"Alibaba Thượng Hải · Alibaba Cloud", short:"Alibaba Cloud", ini:"AC", city:"Thượng Hải", tags:["Cloud","AI mã nguồn mở"],
+   addr:"Area D, Xuhui Riverside, No. 8 Longqi Road, Xuhui District", x:880, y:600,
+   people:"Jerry Zhao · Murray Yu · Nguyễn Minh Hiếu (Alibaba Cloud Vietnam)",
+   stats:[["300+","mô hình mã nguồn mở Qwen & Wan"],["600M+","lượt tải xuống"],["170K+","mô hình phái sinh"]],
+   recap:["Hệ sinh thái AI toàn diện: hạ tầng cloud, mô hình nền tảng, công cụ phát triển, ứng dụng; mô hình mở giúp tiếp cận công nghệ với chi phí linh hoạt.","AI chuyển từ hỗ trợ tác vụ đơn lẻ sang AI Agent thực hiện quy trình, hướng tới kết quả cụ thể.","Dữ liệu chuyên ngành, tích hợp hệ thống và tuân thủ tại thị trường sở tại là yếu tố then chốt để thương mại hóa giải pháp AI."],
+   lessons:["<b>Tập trung tầng ứng dụng:</b> dùng mô hình AI có sẵn giải bài toán theo ngành, thay vì đầu tư lớn vào mô hình nền tảng.","<b>AI Agent gắn kết quả kinh doanh:</b> ưu tiên quy trình đo được hiệu quả như xử lý hồ sơ, chăm sóc khách hàng, phân tích dữ liệu.","<b>Kiến trúc linh hoạt, tuân thủ là lợi thế:</b> dùng nhiều mô hình, nhà cung cấp để giảm phụ thuộc; chủ động đáp ứng yêu cầu bảo vệ, lưu trữ dữ liệu.","<b>Tận dụng nguồn lực hệ sinh thái:</b> chương trình hỗ trợ startup, cloud credit, hợp tác kỹ thuật; xác minh điều kiện, chi phí, giấy phép thương mại trước khi triển khai."],
+   photo:"photos/day2-alibaba.jpg", photo2:"photos/day2-alibaba-2.jpg"},
+  {id:"xjtlu", day:3, date:"20/10", name:"XJTLU Entrepreneur College · Thái Thương", short:"XJTLU", ini:"XJ", city:"Tô Châu", tags:["Giáo dục","Khởi nghiệp","Robot"],
+   addr:"XJTLU Entrepreneur College, Taicang, Suzhou", x:600, y:260, special:true,
+   people:"GS. Xiaojun Zhang · GS. Pietro Borsano · GS. Mohd Rizal Arshad · panel chuyên gia",
+   stats:[["25.000+","sinh viên tại SIP"],["7","lĩnh vực Top 1% ESI"],["731","đơn sáng chế"]],
+   recap:["<b>Mô hình đào tạo XJTLU:</b> 25% khối lượng học tập dành cho khởi nghiệp; Innovation Factory có hơn 80 phòng lab và vườn ươm hỗ trợ khoảng 200 nhóm; học qua dự án, hướng tới học tập suốt đời.","<b>Kinh tế – công nghệ Trung Quốc (GS. Pietro Borsano):</b> cạnh tranh bằng quy mô và tốc độ; hệ sinh thái công nghiệp tạo sức bật; Trung Quốc không phải một thị trường đồng nhất; robot và AI được tiếp nhận rộng rãi; tăng trưởng đi cùng áp lực cạnh tranh.","<b>Tọa đàm thâm nhập thị trường:</b> xác định mục tiêu thương mại ngay từ đầu; tìm lợi thế khác biệt; tiếp cận thành phố hạng hai, hạng ba; thẩm định đối tác; ứng dụng AI tăng tốc vận hành; thử nghiệm thị trường với KPI 90 ngày.","<b>Phiên chiều – Hợp tác ASEAN – Trung Quốc – Hồng Kông:</b> Trung Quốc là nguồn lực sản xuất chiến lược; startup cần giữ quyền kiểm soát giá trị cốt lõi; AI thay đổi cách phát triển và thương mại hóa sản phẩm; thương mại điện tử xuyên biên giới là một hệ sinh thái.","<b>Robot:</b> hướng ứng dụng cao như sạc không dây cho vật thể di động, thuật toán tránh va chạm cho đàn UAV, giao thông thông minh.","<b>Tham quan X3 Co-Venture & Innovation Factory:</b> mô hình Xplore → Xperience → Xpress; hỗ trợ khởi nghiệp đa chiều; lộ trình từ ý tưởng đến POC, MVP và sản phẩm thương mại."],
+   lessons:["<b>Chọn đúng địa phương trước khi chọn thị trường:</b> tìm hiểu nhu cầu, ngành ưu tiên và chính sách hỗ trợ của từng địa phương.","<b>Không cạnh tranh chỉ bằng giá rẻ:</b> kết hợp hiệu quả vận hành với khác biệt về sản phẩm, thương hiệu, chất lượng trải nghiệm.","<b>Chuẩn bị trước khi sang Trung Quốc:</b> xác định phân khúc khách hàng, KPI, đối tác mục tiêu và phương án thương mại; thử nghiệm hợp tác nhỏ trước khi mở rộng.","<b>Kết hợp AI với năng lực con người:</b> dùng AI tăng tốc nghiên cứu và vận hành, giữ vai trò con người trong xác minh và ra quyết định.","<b>Tối ưu nguồn cung nhưng không đánh đổi chất lượng:</b> kiểm chứng nhu cầu trước khi sản xuất; tìm cơ hội trong những mắt xích còn bỏ ngỏ; học mô hình Trung Quốc nhưng bản địa hóa.","<b>Kiểm chứng trước khi mở rộng:</b> phát triển POC và MVP; chủ động kết nối hệ sinh thái để tìm cố vấn, đối tác và nhà đầu tư."],
+   photo:"photos/day3-xjtlu.jpg", photo2:"photos/day3-x3.jpg", specialPhoto:null,
+   specialRecap:["Tối 20/10 – Ngày Phụ nữ Việt Nam: BTC và các doanh nghiệp tổ chức chúc mừng chị em trong Đoàn."]},
+  {id:"sip", day:4, date:"21/10", name:"SIP Urban Planning Exhibition Hall", short:"SIP Exhibition Hall", ini:"SIP", city:"Tô Châu", tags:["Quy hoạch đô thị","Trải nghiệm"],
+   addr:"Block B, Archives Building, No. 328 Suzhou Avenue East, SIP", x:420, y:420,
+   stats:[["1994","năm thành lập SIP"],["~15%","GDP Tô Châu"],["4.500+","DN công nghệ"]],
+   recap:["Quy hoạch đô thị & thu hút đầu tư: từ những cánh đồng lúa, SIP nhiều năm liền đứng đầu bảng đánh giá tổng hợp các khu kinh tế cấp quốc gia.","Hệ sinh thái doanh nghiệp: cách một khu công nghiệp nuôi dưỡng SME công nghệ, DN công nghệ cao và “tiểu cự nhân”.","Nhà triển lãm 3 tầng, 19 khu, ~12.000 m²: cách một khu công nghiệp được quy hoạch và phát triển đồng bộ ngay từ đầu."], photo:null},
+  {id:"pingjiang", day:4, date:"21/10", name:"Phố cổ Bình Giang", short:"Phố cổ Bình Giang", ini:"BG", city:"Tô Châu", tags:["Văn hóa","Di sản"],
+   addr:"Pingjiang Road, Gusu District, Suzhou", x:270, y:500,
+   stats:[["1.606 m","chiều dài phố"],["800 năm","bố cục gần nguyên vẹn"],["2.500+","năm lịch sử"]],
+   recap:["Con phố ven kênh chạy song song sông Bình Giang, tuyến đường chính của Tô Châu từ thời nhà Tống.","Nhà cổ, cầu đá, quán trà ven sông: cảm nhận nhịp sống “phố nước” và đời sống thương mại truyền thống của Tô Châu.","Bài học cho startup Việt: Thượng Hải cho thấy sự nhanh và hiện đại, Bình Giang cho thấy sự kiên nhẫn và giữ gìn gốc rễ."], photo:null},
+  {id:"block71", day:5, date:"22/10", name:"BLOCK71 Suzhou & NUS AI Innovation Centre", short:"BLOCK71", ini:"71", city:"Tô Châu", tags:["Ươm tạo","Deep tech"],
+   addr:"Building 3, Public Academy, No. 377 Linquan Street, Dushu Lake, SIP", x:430, y:600,
+   stats:[["120+","startup Singapore & TQ được hỗ trợ"]],
+   recap:["Liên kết đại học – viện nghiên cứu – doanh nghiệp: kết nối công nghệ, sáng chế từ Singapore với nhu cầu ứng dụng tại Trung Quốc; doanh nghiệp có thể hợp tác với chuyên gia để giải bài toán chuyên sâu, bổ sung năng lực R&D.","Hỗ trợ startup tiếp cận thị trường: BLOCK71 kết nối cố vấn thương mại hóa, chuyên gia pháp lý và sở hữu trí tuệ, nhà đầu tư, đối tác và cơ hội thử nghiệm.","Hiểu thị trường theo từng địa phương: nhu cầu và cách kinh doanh tại Trung Quốc khác nhau giữa các khu vực; lựa chọn địa bàn, hiểu ngôn ngữ và xây dựng quan hệ bản địa là nền tảng hợp tác."],
+   lessons:["Tận dụng nguồn lực nghiên cứu và công nghệ từ đối tác, tập trung vào bài toán khách hàng cụ thể và thử nghiệm trước khi mở rộng."],
+   photo:"photos/day5-block71.jpg", photo2:"photos/day5-block71-wall.jpg"},
+  {id:"iflytek", day:5, date:"22/10", name:"iFLYTEK", short:"iFLYTEK", ini:"iF", city:"Tô Châu", tags:["AI giọng nói","LLM"],
+   addr:"Building E4, AI Industrial Park, No. 88 Jinjihu Avenue, SIP", x:540, y:520,
+   people:"Ông Lý Hâm – Phó Viện trưởng Viện Nghiên cứu iFLYTEK",
+   stats:[["10 triệu+","nhà phát triển trong hệ sinh thái"],["25%","doanh thu cho R&D & đầu tư startup"],["70–20–10","phân bổ R&D"]],
+   recap:["<b>Chiến lược R&D & thương mại hóa:</b> đầu tư dài hạn vào năng lực lõi, từ giọng nói và ngôn ngữ mở rộng sang mô hình lớn Spark; phân bổ R&D 70% sản phẩm bán trong năm, 20% sản phẩm sau 2–3 năm, 10% nghiên cứu dài hạn; đội nghiên cứu phát triển công nghệ, đội sản phẩm chịu trách nhiệm thương mại hóa.","<b>Hệ sinh thái sản phẩm & chiến lược thị trường:</b> kết hợp nền tảng – ứng dụng – thiết bị (Spark, chatbot, AI agent, API, máy học tập, sổ thông minh, máy dịch, thiết bị ghi âm); cạnh tranh bằng hiệu quả ứng dụng, bám định hướng chính sách; thích nghi và bản địa hóa, tối ưu trên chip Huawei, ưu tiên giáo dục và y tế tại ASEAN."],
+   lessons:["Cơ hội nằm ở tích hợp, bản địa hóa và thương mại hóa giải pháp tại Việt Nam. Trước khi hợp tác, cần kiểm chứng chất lượng tiếng Việt, hiệu quả thực tế, chi phí, điều kiện dữ liệu và hỗ trợ kỹ thuật."],
+   photo:"photos/day5-iflytek.jpg"},
+  {id:"tusstar", day:6, date:"23/10", name:"TusStar", short:"TusStar", ini:"TS", city:"Tô Châu", tags:["Ươm tạo","Công nghệ lõi","Ký MOU"],
+   addr:"4F, Building 9, No. 60 Weixin Road, SIP", x:520, y:390,
+   stats:[["20.000+","DN được ươm tạo"],["207","điểm ươm tạo"],["51","công ty niêm yết"]],
+   recap:["Đón đoàn và tham quan khuôn viên TusStar; giới thiệu Tập đoàn TusHoldings và TusStar.","Chia sẻ từ đại diện các doanh nghiệp được ươm tạo.","Ký kết biên bản ghi nhớ hợp tác (MOU) giữa hai bên, trong đó có MOU Learn to Leap – TusStar; giao lưu tự do."], photo:null},
+  {id:"zhida", day:6, date:"23/10", name:"Shanghai Zhida & Sunmi Technology", short:"Zhida · Sunmi", ini:"ZS", city:"Thượng Hải", tags:["Trạm sạc EV","Thiết bị thương mại"],
+   addr:"Chuangzhitiandi Technology Center, No. 471 Zhengli Road, Yangpu", x:900, y:170,
+   stats:[["13,6%","thị phần trạm sạc tại nhà ở TQ (Zhida)"],["10%+","thị phần theo doanh thu 2024 (Sunmi)"]],
+   recap:["ZHIDA chuyên phát triển trạm sạc xe điện tại nhà, giải pháp quản lý năng lượng và robot sạc tự động.","SUNMI là nhà cung cấp giải pháp thiết bị thương mại thông minh trên nền tảng Android."], photo:null},
+  {id:"pnp", day:6, date:"23/10", name:"Plug and Play Shanghai", short:"Plug and Play", ini:"PnP", city:"Thượng Hải", tags:["Đổi mới sáng tạo","Kết nối"],
+   addr:"No. 481 Zhengli Road, Yangpu District", x:1000, y:230,
+   people:"Ông Henry Huang – Giám đốc Vườn ươm",
+   stats:[["50","văn phòng tại hơn 30 quốc gia"]],
+   recap:["Giới thiệu hệ sinh thái đổi mới sáng tạo tại quận Dương Phố.","Hệ sinh thái đổi mới sáng tạo tại Thượng Hải và định hướng cho doanh nghiệp nước ngoài muốn hiện diện tại thị trường Trung Quốc.","Giao lưu tự do và kết nối trực tiếp 1-1."], photo:null},
+];
+const DAYS = [
+  {d:1,date:"18/10"},{d:2,date:"19/10"},{d:3,date:"20/10"},{d:4,date:"21/10"},{d:5,date:"22/10"},{d:6,date:"23/10"},
+];
+const LEG_MS = 1600;            // mỗi chặng < 5s
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches && !location.search.includes("motion");
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const NS = "http://www.w3.org/2000/svg";
+const svgEl = (tag, attrs={}) => { const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); return e; };
+const ease = t => t<.5 ? 2*t*t : -1+(4-2*t)*t;
+const wait = ms => new Promise(r=>setTimeout(r, REDUCED?0:ms));
+const fx = () => $("#fx");
+
+/* ---------- FX ---------- */
+function ripple(x,y,color){ const c=svgEl("circle",{cx:x,cy:y,r:10,class:"ripple"}); if(color) c.style.stroke=color; fx().appendChild(c); setTimeout(()=>c.remove(),1000); }
+function confetti(x,y,n=22){
+  const cols=["#C8102E","#1E9E5A","#F7C325","#1B2A5B","#F6A6B8"];
+  for(let i=0;i<n;i++){ const a=Math.random()*Math.PI*2, d=40+Math.random()*70;
+    const r=svgEl("rect",{x:x-3,y:y-3,width:6,height:6,rx:1,fill:cols[i%cols.length],class:"confetti"});
+    r.style.setProperty("--dx",Math.cos(a)*d+"px"); r.style.setProperty("--dy",Math.sin(a)*d-30+"px"); r.style.transformOrigin=`${x}px ${y}px`;
+    fx().appendChild(r); setTimeout(()=>r.remove(),1500); }
+}
+function puff(x,y){ const c=svgEl("circle",{cx:x,cy:y,r:4,class:"puff"}); c.style.transformOrigin=`${x}px ${y}px`; fx().appendChild(c); setTimeout(()=>c.remove(),950); }
+function petals(n=28){
+  for(let i=0;i<n;i++){ setTimeout(()=>{ const x=Math.random()*1200;
+    const p=svgEl("path",{d:"M0,-6 C4,-6 6,-2 6,0 C6,3 3,6 0,6 C-3,6 -6,3 -6,0 C-6,-2 -4,-6 0,-6 Z",class:"petal",transform:`translate(${x} 0)`});
+    p.style.animationDuration=(3+Math.random()*2)+"s"; fx().appendChild(p); setTimeout(()=>p.remove(),5200); }, i*120); }
+}
+
+/* ---------- Build map ---------- */
+let cur = -1, moving = false, visited = new Set(), legPaths = [], stopEls = [];
+function legD(a,b){ const mx=(a.x+b.x)/2,my=(a.y+b.y)/2,dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1,k=Math.min(60,len*.18);
+  return `M${a.x},${a.y} Q${mx-dy/len*k},${my+dx/len*k} ${b.x},${b.y}`; }
+(function build(){
+  const R=$("#routes"), S=$("#stops");
+  for(let i=0;i<STOPS.length-1;i++){ const p=svgEl("path",{d:legD(STOPS[i],STOPS[i+1]),class:"route"}); R.appendChild(p); legPaths.push(p); }
+  STOPS.forEach((s,i)=>{
+    const g=svgEl("g",{class:"stop hidden"+(s.special?" special":""),transform:`translate(${s.x} ${s.y})`,tabindex:"0",role:"button","aria-label":`${s.short} · Ngày ${s.day}`});
+    g.appendChild(svgEl("circle",{r:22,class:"ring"}));
+    const ini=svgEl("text",{class:"ini",y:4}); ini.textContent=s.ini; g.appendChild(ini);
+    g.appendChild(svgEl("circle",{cx:16,cy:-16,r:9,class:"numbg"}));
+    const n=svgEl("text",{class:"num",x:16,y:-13}); n.textContent="D"+s.day; g.appendChild(n);
+    const ck=svgEl("g",{class:"check",transform:"translate(-16 -16)"}); ck.appendChild(svgEl("circle",{r:8,fill:"#1E9E5A"})); ck.appendChild(svgEl("path",{d:"M-4,0 L-1,3 L4,-3",fill:"none",stroke:"#fff","stroke-width":2,"stroke-linecap":"round"})); g.appendChild(ck);
+    const right=s.x<1050;
+    const lbl=svgEl("text",{class:"lbl",x:right?28:-28,y:4,"text-anchor":right?"start":"end"}); lbl.textContent=s.short; g.appendChild(lbl);
+    const sub=svgEl("text",{class:"sub",x:right?28:-28,y:18,"text-anchor":right?"start":"end"}); sub.textContent=s.date+(s.special?" · 🌸 20/10":""); g.appendChild(sub);
+    g.addEventListener("click",()=>goTo(i));
+    g.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();goTo(i);} });
+    S.appendChild(g); stopEls.push(g);
+  });
+  const D=$("#days");
+  DAYS.forEach(d=>{ const b=document.createElement("button"); b.className="day"+(d.d===3?" special":""); b.setAttribute("role","tab"); b.dataset.day=d.d;
+    b.textContent=`N${d.d} · ${d.date}`; b.addEventListener("click",()=>goTo(STOPS.findIndex(s=>s.day===d.d))); D.appendChild(b); });
+  const wrap=$("#delegation");
+  DELEGATION.forEach((d,i)=>{ const b=document.createElement("div"); b.className="badge"+(d.ltl?" ltl":""); b.title=d.name; b.innerHTML=(d.logo?`<img src="${d.logo}" alt="${d.name}">`:`<b>${d.ini}</b>`)+`<span>${d.name}</span>`; b.style.animationDelay=(-i*.3)+"s"; wrap.appendChild(b); });
+  // stops pop in one by one behind the welcome card
+  STOPS.forEach((s,i)=>setTimeout(()=>{ stopEls[i].classList.remove("hidden"); stopEls[i].classList.add("in"); }, 300+i*110));
+  document.addEventListener("keydown",e=>{ if(cur<0||moving) return; if(e.key==="ArrowRight") goTo(cur+1); if(e.key==="ArrowLeft") goTo(cur-1); if(e.key==="Escape") closePanel(); });
+})();
+
+/* ---------- Flight: Hà Nội → Phố Đông ---------- */
+$("#btnStart").addEventListener("click", async ()=>{
+  $("#welcome").classList.add("gone");
+  $("#statusTxt").textContent="✈ Đang bay từ Hà Nội sang Thượng Hải…"; $("#status").classList.add("moving");
+  const arc=$("#flightArc"), L=arc.getTotalLength(); arc.setAttribute("opacity",".5");
+  const plane=$("#plane"), trail=$("#trail"); trail.innerHTML="";
+  const chips=DELEGATION.map(d=>{ const g=svgEl("g",{filter:"url(#sh)"});
+    g.appendChild(svgEl("rect",{x:-22,y:-13,width:44,height:26,rx:7,fill:"#fff",stroke:d.ltl?"#C8102E":"#DCE3F0","stroke-width":1.5}));
+    if(d.logo){ const im=svgEl("image",{x:-19,y:-10,width:38,height:20,preserveAspectRatio:"xMidYMid meet"}); im.setAttribute("href",d.logo); g.appendChild(im); }
+    else { const t=svgEl("text",{"text-anchor":"middle",y:4,"font-size":"10","font-weight":"800","font-family":"Be Vietnam Pro,sans-serif",fill:"#1B2A5B"}); t.textContent=d.ini; g.appendChild(t); }
+    g.style.opacity=0; trail.appendChild(g); return g; });
+  const place=(el,u,rot)=>{ u=Math.max(0,Math.min(1,u)); const p=arc.getPointAtLength(u*L), q=arc.getPointAtLength(Math.min(L,u*L+2));
+    const a=Math.atan2(q.y-p.y,q.x-p.x)*180/Math.PI; el.setAttribute("transform",`translate(${p.x} ${p.y})`+(rot?` rotate(${a})`:"")); };
+  plane.style.opacity=1;
+  await new Promise(res=>{ const dur=REDUCED?10:5200, t0=performance.now(), gap=.028;
+    (function f(now){ const t=Math.min(1,(now-t0)/dur), u=ease(t);
+      place(plane,u,true); plane.querySelector("#planeBody").setAttribute("transform",`scale(${1.3-.3*u})`);
+      chips.forEach((c,i)=>{ const uu=u-gap*(i+1); c.style.opacity=uu>0?1:0; place(c,uu+Math.sin(now/150+i)*.004,false); });
+      if(t<1) requestAnimationFrame(f); else res(); })(t0); });
+  // landing
+  const s0=STOPS[0]; ripple(s0.x,s0.y,"#1B2A5B"); confetti(s0.x,s0.y,30); plane.style.transition="opacity .5s"; plane.style.opacity=0; arc.setAttribute("opacity","0");
+  $("#statusTxt").textContent="🛬 Đã hạ cánh Phố Đông · các doanh nghiệp lên xe bus";
+  // bus appears, chips hop in one by one
+  const bus=$("#bus"); placeBus(s0.x,s0.y,0); bus.setAttribute("opacity","1"); stopEls[0].classList.add("hop");
+  for(let i=0;i<chips.length;i++){ const c=chips[i];
+    const m=/translate\(([-\d.]+) ([-\d.]+)\)/.exec(c.getAttribute("transform")||"")||[0,s0.x,s0.y];
+    c.style.transform=`translate(${m[1]}px,${m[2]}px)`; c.removeAttribute("transform"); void c.getBBox();
+    c.style.transition="transform .5s cubic-bezier(.3,1.4,.5,1),opacity .45s";
+    c.style.transform=`translate(${s0.x}px,${s0.y-6}px) scale(.15)`; c.style.opacity=0; await wait(55); }
+  await wait(450); trail.innerHTML="";
+  cur=0; visited.add(0); arrive(0);
+});
+
+/* ---------- Bus ---------- */
+function placeBus(x,y,angle){ $("#bus").setAttribute("transform",`translate(${x} ${y}) rotate(${angle})`); }
+function animateLeg(from,to){
+  return new Promise(res=>{
+    const fwd=to>from, idx=fwd?from:to, path=legPaths[idx], L=path.getTotalLength();
+    path.classList.add("live");
+    const t0=performance.now(), dur=REDUCED?10:LEG_MS; let lastPuff=0, rot=0;
+    (function f(now){
+      const t=Math.min(1,(now-t0)/dur), u=ease(t), d=fwd?u*L:(1-u)*L;
+      const p=path.getPointAtLength(d), q=path.getPointAtLength(Math.max(0,Math.min(L,d+(fwd?3:-3))));
+      let a=Math.atan2(q.y-p.y,q.x-p.x)*180/Math.PI;
+      const flip=Math.abs(a)>90; $("#busBody").setAttribute("transform",flip?"scale(-1 1)":""); if(flip) a+=180;
+      placeBus(p.x,p.y,a);
+      const speed=Math.sin(t*Math.PI); // 0→1→0
+      $("#busBob").setAttribute("transform",`translate(0 ${Math.sin(now/45)*1.6*speed}) rotate(${Math.sin(now/90)*2*speed})`);
+      rot+=speed*14; $("#w1").setAttribute("transform",`translate(-13 14) rotate(${rot})`); $("#w2").setAttribute("transform",`translate(13 14) rotate(${rot})`);
+      if(now-lastPuff>110&&speed>.2){ lastPuff=now; const dl=Math.hypot(q.x-p.x,q.y-p.y)||1; puff(p.x-(q.x-p.x)/dl*26, p.y-(q.y-p.y)/dl*26+8); }
+      if(t<1) requestAnimationFrame(f); else { path.classList.remove("live"); res(); }
+    })(t0);
+  });
+}
+async function goTo(target){
+  target=Math.max(0,Math.min(STOPS.length-1,target));
+  if(moving||cur<0||target===cur) return;
+  moving=true; $("#status").classList.add("moving"); closePanel(); camFull();
+  stopEls.forEach(g=>g.classList.remove("active","next"));
+  const step=target>cur?1:-1;
+  while(cur!==target){
+    const next=cur+step;
+    $("#statusTxt").textContent=`🚌 Đang đi đến ${STOPS[next].short} (Ngày ${STOPS[next].day})…`;
+    stopEls[next].classList.add("next");
+    await animateLeg(cur,next);
+    cur=next; visited.add(cur); stopEls[cur].classList.remove("next");
+    if(step>0) legPaths[cur-1].classList.add("done");
+    if(cur!==target){ stopEls[cur].classList.add("hop"); ripple(STOPS[cur].x,STOPS[cur].y); setTimeout(()=>stopEls[cur].classList.remove("hop"),600); await wait(180); }
+  }
+  moving=false; $("#status").classList.remove("moving");
+  arrive(cur);
+}
+function arrive(i){
+  const s=STOPS[i];
+  // squash & bounce
+  const bob=$("#busBob"); bob.setAttribute("transform","scale(1.15 .85)"); setTimeout(()=>bob.setAttribute("transform","scale(.95 1.08)"),120); setTimeout(()=>bob.setAttribute("transform",""),260);
+  ripple(s.x,s.y); confetti(s.x,s.y);
+  if(s.special) petals();
+  stopEls[i].classList.add("hop"); setTimeout(()=>stopEls[i].classList.remove("hop"),600);
+  $("#statusTxt").textContent=`📍 ${s.short} · Ngày ${s.day} (${s.date})`;
+  stopEls.forEach((g,k)=>{ g.classList.toggle("active",k===i); g.classList.toggle("visited",visited.has(k)&&k!==i); g.classList.toggle("next",k===i+1); });
+  document.querySelectorAll(".day").forEach(b=>{ const d=+b.dataset.day; b.classList.toggle("active",d===s.day); b.classList.toggle("visited",d<s.day); });
+  renderPanel(i); camFocus(s); setTimeout(openPanel,350);
+}
+
+/* ---------- Camera (viewBox) ---------- */
+const VB={x:0,y:0,w:1200,h:700}; let camRaf=null;
+function setVB(v){ $("#mapSvg").setAttribute("viewBox",`${v.x} ${v.y} ${v.w} ${v.h}`); }
+function camTo(target,ms=700){
+  if(camRaf) cancelAnimationFrame(camRaf);
+  const from={...VB}, t0=performance.now(), dur=REDUCED?10:ms;
+  (function f(now){ const t=Math.min(1,(now-t0)/dur), u=ease(t);
+    for(const k in VB) VB[k]=from[k]+(target[k]-from[k])*u; setVB(VB);
+    if(t<1) camRaf=requestAnimationFrame(f); else camRaf=null; })(t0);
+}
+function camFull(){ camTo({x:0,y:0,w:1200,h:700},800); }
+function camFocus(s){
+  const st=$(".stage").getBoundingClientRect(), mobile=innerWidth<=760;
+  const zoom=1.7, w=1200/zoom, h=700/zoom;
+  // phần map nhìn thấy (không bị panel che)
+  const pw=mobile?0:Math.min(400,st.width*.42)+24, ph=mobile?st.height*.55+24:0;
+  // tỉ lệ đơn vị viewBox/px (meet)
+  const k=Math.max(w/st.width,h/st.height);
+  const visW=st.width*k - pw*k, visH=st.height*k - ph*k;
+  const x=s.x - visW/2 - (st.width*k - w)/2, y=s.y - visH/2 - (st.height*k - h)/2;
+  camTo({x,y,w,h},700);
+}
+
+/* ---------- Panel ---------- */
+function openPanel(){ $("#panel").classList.add("open"); $(".stage").classList.add("open"); }
+function closePanel(){ if($("#panel").classList.contains("open")&&!moving) camFull(); $("#panel").classList.remove("open"); $(".stage").classList.remove("open"); }
+function photoBox(src,special,caption){
+  if(src) return `<div class="photo${special?" special":""}"><img src="${src}" alt="${caption}"></div>`;
+  return `<div class="photo${special?" special":""}"><div><div class="ico">${special?"🌸":"📷"}</div><b>${caption}</b><small>Ảnh sẽ được bổ sung</small></div></div>`;
+}
+function recapBox(list){ return (list&&list.length)?`<ul>${list.map(x=>`<li>${x}</li>`).join("")}</ul>`:`<div class="placeholder">Nội dung recap cho điểm này sẽ được cập nhật sau khi BTC cung cấp.</div>`; }
+function renderPanel(i){
+  const s=STOPS[i];
+  const stats=s.stats?`<div class="stats">${s.stats.map(([b,t])=>`<div class="stat"><b>${b}</b><span>${t}</span></div>`).join("")}</div>`:"";
+  $("#panel").innerHTML=`
+    <div class="panel-in">
+      <button class="close" id="closePanel" aria-label="Đóng">✕</button>
+      <div class="meta"><span class="pill d">Ngày ${s.day} · ${s.date}</span><span class="pill city">${s.city}</span>${s.tags.map(t=>`<span class="pill tag">${t}</span>`).join("")}</div>
+      <h2>${s.name}</h2>
+      <div class="addr"><span>📍</span><span>${s.addr}</span></div>
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-pane="recap">Recap</button>
+        <button class="tab" data-pane="photo">Ảnh Đoàn</button>
+        ${s.special?`<button class="tab special" data-pane="special">🌸 20/10</button>`:""}
+      </div>
+      ${s.people?`<div class="addr"><span>👥</span><span>${s.people}</span></div>`:""}
+      <div class="pane active" data-pane="recap"><div class="recap">${stats}<div class="sect navy">Nội dung cốt lõi</div>${recapBox(s.recap)}${s.lessons?`<div class="sect green">Bài học & cơ hội cho startup Việt</div><ul>${s.lessons.map(x=>`<li>${x}</li>`).join("")}</ul>`:""}</div></div>
+      <div class="pane" data-pane="photo">${photoBox(s.photo,false,"Ảnh chụp chung của Đoàn tại "+s.short)}${s.photo2?photoBox(s.photo2,false,""):""}<div class="caption">${s.photoCaption||("Đoàn Viet Startup INTERchange 2026 tại "+s.name)}</div></div>
+      ${s.special?`<div class="pane" data-pane="special"><div class="recap">${recapBox(s.specialRecap)}</div>${photoBox(s.specialPhoto,true,"Ảnh kỷ niệm 20/10 của chị em trong Đoàn")}<div class="caption">Chúc mừng Ngày Phụ nữ Việt Nam 20/10 🌸</div></div>`:""}
+      <div class="nav">
+        <button class="btn ghost" id="prev" ${i===0?"disabled":""}>← Điểm trước</button>
+        <button class="btn" id="next" ${i===STOPS.length-1?"disabled":""}>Điểm tiếp theo →</button>
+      </div>
+    </div>`;
+  const P=$("#panel");
+  P.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
+    P.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===t));
+    P.querySelectorAll(".pane").forEach(p=>p.classList.toggle("active",p.dataset.pane===t.dataset.pane));
+    if(t.dataset.pane==="special") petals(18);
+  }));
+  $("#prev").addEventListener("click",()=>goTo(i-1));
+  $("#next").addEventListener("click",()=>goTo(i+1));
+  $("#closePanel").addEventListener("click",closePanel);
+}
+</script>
+
+</body>
+</html>
