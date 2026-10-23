@@ -52,11 +52,23 @@ button{font:inherit}
 .stage{flex:1;min-height:0;position:relative;overflow:hidden}
 .stage{--pw:min(400px,42%)}
 .stage svg{width:100%;height:100%;display:block}
-.status{position:absolute;left:12px;bottom:12px;background:var(--paper);border:1.5px solid var(--line);border-radius:12px;padding:8px 12px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(27,42,91,.08);z-index:3;max-width:min(70%,420px)}
+.status{position:absolute;left:50%;top:10px;transform:translateX(-50%);white-space:nowrap;background:var(--paper);border:1.5px solid var(--line);border-radius:12px;padding:8px 12px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(27,42,91,.08);z-index:3;max-width:min(70%,420px)}
 .status .dot{width:10px;height:10px;border-radius:50%;background:var(--yellow);box-shadow:0 0 0 3px rgba(247,195,37,.3);flex:none}
 .status.moving .dot{animation:blink .5s infinite alternate}
 @keyframes blink{to{opacity:.3;transform:scale(.7)}}
-.hint{position:absolute;right:12px;bottom:12px;font-size:11px;color:var(--muted);background:rgba(255,255,255,.8);padding:6px 10px;border-radius:999px;z-index:3}
+.listcard{position:absolute;left:14px;bottom:14px;width:196px;background:#FFFCF4;border:1.5px solid #E8DCC2;border-radius:14px;box-shadow:0 10px 26px rgba(90,70,30,.14);padding:10px 12px 8px;font-size:12px;z-index:3;transform:rotate(-1.5deg);max-height:46%;overflow:auto}
+.listhead{letter-spacing:.3em;color:#B08A4B;font-weight:700;text-align:center;border-bottom:1.5px dashed #E8DCC2;padding-bottom:6px;margin-bottom:4px;font-size:12px}
+.listcard ol{list-style:none;margin:0;padding:0}
+.listcard li{display:flex;align-items:center;gap:8px;padding:4px 2px;cursor:pointer;border-radius:6px;color:#4A3B22}
+.listcard li:hover{background:#FFF3D6}
+.listcard .cb{width:14px;height:14px;border:1.5px solid #C9B98F;border-radius:3px;flex:none;display:grid;place-items:center;font-size:10px;color:#fff;background:#fff}
+.listcard li.done .cb{background:var(--green);border-color:var(--green)} .listcard li.done .cb::after{content:"✓"}
+.listcard li.done .nm{text-decoration:line-through;color:var(--muted)}
+.listcard li.cur .cb{border-color:var(--red);background:var(--pinkbg)} .listcard li.cur .nm{color:var(--red);font-weight:700}
+.listcard .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.listcard .dy{font-size:9px;font-weight:700;color:#B08A4B;background:#FFF3D6;border-radius:999px;padding:1px 6px}
+.progress{position:absolute;right:14px;bottom:14px;background:#fff;border:1.5px solid #E8DCC2;border-radius:999px;padding:8px 14px;font-weight:600;color:#4A3B22;box-shadow:0 8px 22px rgba(90,70,30,.14);display:flex;align-items:center;gap:7px;z-index:3;font-size:13px}
+.progress .lemon{font-size:16px} .progress b{color:var(--red);font-variant-numeric:tabular-nums} .progress .arr{color:#B08A4B;font-weight:800}
 
 /* ---------- Welcome overlay ---------- */
 #welcome{position:absolute;inset:0;display:grid;place-items:center;background:rgba(243,247,254,.55);backdrop-filter:blur(6px);z-index:10;transition:opacity .7s,transform .7s;overflow:auto;padding:16px}
@@ -138,32 +150,36 @@ button{font:inherit}
 .footer .cities span{padding:3px 10px;border-radius:999px;font-weight:700}
 .footer .cities .sh{background:var(--green)} .footer .cities .sz{background:#8FB0E8;color:var(--navy)}
 
-/* ---------- SVG styling ---------- */
+/* SVG styling */
 .stop{cursor:pointer;transform-box:fill-box;transform-origin:center}
-.stop .ring{fill:var(--paper);stroke:var(--line);stroke-width:2;transition:stroke .2s}
+.stop .ring{fill:#fff;stroke-width:4;transition:stroke .2s,stroke-width .2s}
+.stop .halo{opacity:.4;transition:fill .3s}
 .stop:hover .ring{stroke:var(--navy)}
-.stop.active .ring{stroke:var(--red);stroke-width:3}
-.stop.visited .ring{stroke:var(--green)}
-.stop .lbl{font-family:var(--font);font-size:11px;font-weight:700;fill:var(--navy);pointer-events:none}
-.stop .sub{font-family:var(--font);font-size:9px;fill:var(--muted);pointer-events:none}
-.stop .ini{font-family:var(--font);font-size:11px;font-weight:800;fill:var(--navy);text-anchor:middle;pointer-events:none}
-.stop .num{font-family:var(--font);font-size:9px;font-weight:800;fill:#fff;text-anchor:middle;pointer-events:none}
-.stop .numbg{fill:var(--navy)} .stop.special .numbg{fill:var(--red)}
+.stop.active .ring{stroke:var(--red);stroke-width:5}
+.stop.visited .halo{fill:#1E9E5A;opacity:.3}
+.stop .emo{font-size:26px;pointer-events:none;font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif}
+.stop .lbl{font-family:var(--font);font-size:11.5px;font-weight:700;fill:#4A3B22;pointer-events:none}
+.stop .pillbg{fill:#fff;stroke:#E8DCC2;stroke-width:1.2;opacity:.97}
+.stop .sub{font-family:var(--font);font-size:9px;font-weight:600;fill:var(--muted);pointer-events:none}
+.stop .num{font-family:var(--font);font-size:10px;font-weight:800;fill:#fff;text-anchor:middle;pointer-events:none}
+.stop .numbg{fill:var(--navy);stroke:#fff;stroke-width:2} .stop.special .numbg{fill:var(--red)}
 .stop .check{opacity:0;transition:opacity .3s}
 .stop.visited .check{opacity:1}
 .stop.hidden{opacity:0}
 .stop.in{animation:stopIn .6s cubic-bezier(.2,.9,.3,1.4) both}
 @keyframes stopIn{from{opacity:0;transform:scale(.2)}}
 .stop.next .ring{animation:ringPulse 1.4s ease-out infinite}
-@keyframes ringPulse{0%{stroke:var(--yellow);stroke-width:3}100%{stroke:var(--yellow);stroke-width:14;stroke-opacity:0}}
+@keyframes ringPulse{0%{stroke:var(--yellow);stroke-width:4}100%{stroke:var(--yellow);stroke-width:16;stroke-opacity:0}}
 .stop.hop{animation:hop .5s}
 @keyframes hop{30%{transform:translateY(-10px) scale(1.15)}60%{transform:translateY(0) scale(.95)}}
-.route{fill:none;stroke:#9FB6DC;stroke-width:3;stroke-dasharray:6 7;stroke-linecap:round;animation:dash 1.2s linear infinite}
-@keyframes dash{to{stroke-dashoffset:-13}}
-.route.done{stroke:var(--green);stroke-dasharray:none;animation:none}
-.route.live{stroke:var(--yellow);stroke-dasharray:none;animation:none}
-.city{font-family:var(--font);font-weight:800;fill:var(--navy);opacity:.9}
-.citysub{font-family:var(--font);font-size:11px;fill:var(--muted);letter-spacing:.14em}
+.leg .ro{fill:none;stroke:#D9A207;stroke-width:14;stroke-linecap:round;stroke-linejoin:round}
+.leg .rb{fill:none;stroke:#F7C325;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;transition:stroke .4s}
+.leg .rc{fill:none;stroke:#fff;stroke-width:2;stroke-dasharray:8 8;animation:dash 1s linear infinite;opacity:.9}
+@keyframes dash{to{stroke-dashoffset:-16}}
+.leg.done .ro{stroke:#15804A} .leg.done .rb{stroke:#1E9E5A} .leg.done .rc{animation:none;stroke-dasharray:none;opacity:.45}
+.leg.live .rb{stroke:#FFE07A}
+.city{font-family:var(--font);font-weight:800;fill:var(--navy);opacity:.9;paint-order:stroke;stroke:#fff;stroke-width:6;stroke-linejoin:round}
+.citysub{font-family:var(--font);font-size:11px;fill:var(--muted);letter-spacing:.14em;paint-order:stroke;stroke:#fff;stroke-width:4}
 .ripple{fill:none;stroke:var(--green);stroke-width:3;animation:ripple .9s ease-out forwards;pointer-events:none}
 @keyframes ripple{from{r:10;opacity:1}to{r:60;opacity:0}}
 .puff{fill:#B9C6DC;opacity:.7;animation:puff .9s ease-out forwards;pointer-events:none}
@@ -183,9 +199,10 @@ button{font:inherit}
 @media (max-width:760px){
   .panel{top:auto;left:12px;right:12px;bottom:12px;width:auto;max-height:55%;transform:translateY(calc(100% + 24px))}
   .panel.open{transform:none}
-  .status{max-width:60%}
+  .status{max-width:80%;font-size:11px}
   .topbar .org{display:none}
-  .hint{display:none}
+  .listcard{display:none}
+  .progress{bottom:auto;top:44px;right:10px;padding:5px 10px;font-size:11px}
 }
 </style>
 
@@ -200,34 +217,54 @@ button{font:inherit}
   <div class="stage">
     <svg id="mapSvg" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid meet" aria-label="Bản đồ hành trình Thượng Hải – Tô Châu">
       <defs>
-        <pattern id="dots" width="26" height="26" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.3" fill="#9FB6DC" opacity=".5"/></pattern>
         <filter id="sh" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#1B2A5B" flood-opacity=".22"/></filter>
-        <linearGradient id="landg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F7FAFE"/><stop offset="1" stop-color="#EEF4FC"/></linearGradient>
+        <pattern id="paper" width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".7" fill="#B9C7A6" opacity=".45"/></pattern>
       </defs>
-      <rect width="1200" height="700" fill="url(#landg)"/>
-      <rect width="1200" height="700" fill="url(#dots)"/>
+      <rect width="1200" height="700" fill="#F3F6EC"/>
+      <rect width="1200" height="700" fill="url(#paper)"/>
+      <g id="scenery-parks"></g>
       <!-- Water -->
-      <g class="wave"><ellipse cx="70" cy="430" rx="130" ry="160" fill="#CFE3F7"/>
-      <path d="M900,0 C 860,120 940,220 1010,330 C 1080,440 1130,520 1200,560 L1200,0 Z" fill="#CFE3F7"/>
-      <path d="M0,0 L1200,0 L1200,60 C 900,100 600,60 300,110 C 150,130 60,110 0,80 Z" fill="#CFE3F7"/>
-      <path d="M980,330 C 930,380 900,430 920,480 C 940,530 880,600 870,700" fill="none" stroke="#B9D3F0" stroke-width="14" stroke-linecap="round"/></g>
-      <path d="M240,470 L470,470 M330,380 L330,560" stroke="#B9D3F0" stroke-width="6" stroke-linecap="round" opacity=".7"/>
-      <path d="M420,520 C 560,520 640,470 740,450 C 820,435 860,400 900,400" fill="none" stroke="#E4EAF5" stroke-width="18" stroke-linecap="round"/>
-      <!-- Clouds -->
-      <g opacity=".55" fill="#fff">
-        <g class="cloud" style="animation-duration:70s"><ellipse cx="0" cy="120" rx="46" ry="16"/><ellipse cx="30" cy="112" rx="30" ry="18"/></g>
-        <g class="cloud" style="animation-duration:95s;animation-delay:-40s"><ellipse cx="0" cy="620" rx="60" ry="18"/><ellipse cx="40" cy="610" rx="36" ry="20"/></g>
-        <g class="cloud" style="animation-duration:120s;animation-delay:-70s"><ellipse cx="0" cy="330" rx="40" ry="14"/><ellipse cx="26" cy="322" rx="26" ry="16"/></g>
+      <g class="wave">
+        <ellipse cx="70" cy="430" rx="130" ry="160" fill="#C7E3F3"/>
+        <path d="M900,0 C 860,120 940,220 1010,330 C 1080,440 1130,520 1200,560 L1200,0 Z" fill="#C7E3F3"/>
+        <path d="M0,0 L1200,0 L1200,60 C 900,100 600,60 300,110 C 150,130 60,110 0,80 Z" fill="#C7E3F3"/>
+        <path d="M980,330 C 930,380 900,430 920,480 C 940,530 880,600 870,700" fill="none" stroke="#C7E3F3" stroke-width="16" stroke-linecap="round"/>
+        <g fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".8">
+          <path d="M1040,120 q10,-6 20,0 q10,6 20,0"/><path d="M1090,200 q10,-6 20,0 q10,6 20,0"/><path d="M1120,420 q10,-6 20,0 q10,6 20,0"/>
+          <path d="M40,380 q10,-6 20,0 q10,6 20,0"/><path d="M80,520 q10,-6 20,0 q10,6 20,0"/><path d="M400,40 q10,-6 20,0 q10,6 20,0"/><path d="M760,30 q10,-6 20,0 q10,6 20,0"/>
+        </g>
+      </g>
+      <path d="M240,470 L470,470 M330,380 L330,560" stroke="#C7E3F3" stroke-width="7" stroke-linecap="round"/>
+      <g id="scenery-blocks"></g>
+      <g id="scenery-roads"></g>
+      <g id="scenery-trees"></g>
+      <!-- Landmarks -->
+      <g id="landmarks" opacity=".95">
+        <!-- Oriental Pearl -->
+        <g transform="translate(1085 330)">
+          <path d="M-16,0 L16,0 L9,-22 L-9,-22 Z" fill="#AFC2E0"/><rect x="-3" y="-112" width="6" height="92" fill="#9DB1D3"/>
+          <circle cy="-72" r="17" fill="#E98CA3"/><circle cy="-72" r="17" fill="none" stroke="#fff" stroke-width="1.5" opacity=".8"/>
+          <circle cy="-114" r="9" fill="#E98CA3"/><rect x="-1.5" y="-152" width="3" height="32" fill="#9DB1D3"/>
+        </g>
+        <!-- Shanghai Tower + Jin Mao -->
+        <g transform="translate(1125 330)"><path d="M-10,0 L10,0 L7,-120 Q0,-128 -7,-120 Z" fill="#B7C8E6"/><path d="M-8,-20 Q0,-30 8,-40 M-8,-60 Q0,-70 7,-80" fill="none" stroke="#fff" stroke-width="1.5" opacity=".7"/></g>
+        <g transform="translate(1050 330)"><path d="M-9,0 L9,0 L6,-70 L0,-90 L-6,-70 Z" fill="#C4D2EA"/></g>
+        <!-- Gate of the Orient (Suzhou) -->
+        <g transform="translate(165 455)"><path d="M-30,0 L-30,-70 Q-30,-112 0,-112 Q30,-112 30,-70 L30,0 L15,0 L15,-62 Q15,-84 0,-84 Q-15,-84 -15,-62 L-15,0 Z" fill="#AFC2E0"/></g>
+        <!-- Pagoda -->
+        <g transform="translate(240 588)"><path d="M-18,0 L18,0 L13,-12 L-13,-12 Z M-14,-14 L14,-14 L10,-26 L-10,-26 Z M-10,-28 L10,-28 L7,-40 L-7,-40 Z M-6,-42 L6,-42 L0,-54 Z" fill="#C77B5A"/><rect x="-11" y="-13" width="22" height="2" fill="#F3E6D0"/><rect x="-8" y="-27" width="16" height="2" fill="#F3E6D0"/></g>
+        <!-- Garden pavilion -->
+        <g transform="translate(300 585)"><path d="M-14,0 L14,0 L14,-10 L-14,-10 Z" fill="#F3E6D0" stroke="#C77B5A" stroke-width="1"/><path d="M-18,-10 Q0,-22 18,-10 Z" fill="#C77B5A"/></g>
+        <!-- Taicang port cranes -->
+        <g transform="translate(690 165)" stroke="#9DB1D3" stroke-width="3" fill="none" stroke-linecap="round"><path d="M0,0 L0,-34 L26,-34 M0,-34 L-8,-26"/><path d="M36,0 L36,-28 L58,-28 M36,-28 L30,-21"/></g>
+        <!-- Boat on Taihu -->
+        <g transform="translate(60 470)"><path d="M-12,0 L12,0 L8,6 L-8,6 Z" fill="#fff"/><path d="M0,0 L0,-16 L10,-4 Z" fill="#F7C325"/></g>
       </g>
       <!-- City labels -->
       <text class="city" x="150" y="330" font-size="30">TÔ CHÂU</text><text class="citysub" x="152" y="350">SUZHOU</text>
-      <text class="city" x="880" y="300" font-size="30">THƯỢNG HẢI</text><text class="citysub" x="882" y="320">SHANGHAI</text>
-      <text class="city" x="560" y="200" font-size="16" opacity=".7">THÁI THƯƠNG</text><text class="citysub" x="562" y="216">TAICANG</text>
-      <!-- skyline near Shanghai -->
-      <g transform="translate(1040 250)" fill="#1B2A5B" opacity=".35"><rect x="0" y="50" width="12" height="40"/><rect x="16" y="20" width="10" height="70"/><circle cx="21" cy="12" r="6"/><rect x="30" y="35" width="14" height="55"/><rect x="48" y="55" width="10" height="35"/><rect x="62" y="30" width="12" height="60"/></g>
-      <!-- pagoda near Suzhou -->
-      <g transform="translate(200 390)" fill="#1B2A5B" opacity=".35"><path d="M0,40 L30,40 L26,30 L4,30 Z M3,30 L27,30 L23,20 L7,20 Z M6,20 L24,20 L20,10 L10,10 Z M12,10 L18,10 L15,0 Z"/></g>
-      <!-- Hà Nội off-map hint -->
+      <text class="city" x="870" y="352" font-size="30">THƯỢNG HẢI</text><text class="citysub" x="872" y="370">SHANGHAI</text>
+      <text class="city" x="560" y="200" font-size="16" opacity=".8">THÁI THƯƠNG</text><text class="citysub" x="562" y="216">TAICANG</text>
+      <!-- Hà Nội hint -->
       <g transform="translate(40 600)"><circle r="7" fill="#C8102E"/><text x="14" y="4" font-family="Be Vietnam Pro,sans-serif" font-size="12" font-weight="800" fill="#1B2A5B">← HÀ NỘI · 18/10</text></g>
       <path id="flightArc" d="M-80,760 Q 500,150 1060,470" fill="none" stroke="#1B2A5B" stroke-width="2" stroke-dasharray="7 9" opacity="0"/>
       <g id="routes"></g>
@@ -254,9 +291,16 @@ button{font:inherit}
           <circle cx="12" cy="0" r="2" fill="#fff"/>
         </g>
       </g>
+      <!-- Compass -->
+      <g transform="translate(1130 92)" font-family="Be Vietnam Pro,sans-serif" font-weight="800">
+        <circle r="30" fill="#fff" stroke="#E8DCC2" stroke-width="1.5"/>
+        <path d="M0,-24 L5,0 L0,24 L-5,0 Z" fill="#C8102E"/><path d="M-24,0 L0,-5 L24,0 L0,5 Z" fill="#1B2A5B"/><circle r="3" fill="#fff"/>
+        <text y="-32" text-anchor="middle" font-size="11" fill="#C8102E">N</text>
+      </g>
     </svg>
     <div class="status" id="status"><span class="dot"></span><span id="statusTxt">Chuẩn bị khởi hành từ Hà Nội…</span></div>
-    <div class="hint">Bấm vào điểm trên bản đồ hoặc dùng phím ← →</div>
+    <div class="listcard" id="listcard"><div class="listhead">· LIST ·</div><ol id="checklist"></ol></div>
+    <div class="progress" id="progress"><span class="lemon">🍋</span><b id="progNum">0/12</b><span>điểm đã qua</span><span class="arr">›</span></div>
 
     <aside class="panel" id="panel" aria-live="polite"></aside>
 
@@ -319,13 +363,13 @@ const STOPS = [
    lessons:["<b>Chủ động xây dựng mạng lưới đối tác:</b> tận dụng cơ quan đại diện, hiệp hội doanh nghiệp và doanh nghiệp địa phương để tìm đối tác, cơ hội hợp tác.","<b>Chuẩn bị trước khi thâm nhập:</b> nghiên cứu nhu cầu khách hàng, rào cản pháp lý, phương thức kinh doanh và tiếng Trung; không chỉ dựa vào lợi thế sản phẩm.","<b>Khởi nghiệp tinh gọn:</b> ứng dụng AI giảm chi phí vận hành, thử nghiệm mô hình với đội nhỏ; tìm hiểu chương trình ươm tạo, hỗ trợ AI cho founder nước ngoài.","<b>Ưu tiên hướng kết nối hai thị trường:</b> du lịch thông minh, giáo dục và dịch vụ cho khách Trung Quốc tại Việt Nam."],
    photo:"photos/day2-tlsq.jpg", photo2:"photos/day2-tlsq-aodai.jpg"},
   {id:"jinjiang", day:2, date:"19/10", name:"Tập đoàn Khách sạn Jin Jiang", short:"Jin Jiang", ini:"JJ", city:"Thượng Hải", tags:["Hospitality","AI","Chuỗi cung ứng"],
-   addr:"No. 222 Longcao Road, Caohejing, Xuhui District", x:850, y:520,
+   addr:"No. 222 Longcao Road, Caohejing, Xuhui District", x:845, y:512,
    people:"Harry Zhao · Eric Li · Rocky Liu",
    recap:["AI tạo giá trị khi tích hợp vào quy trình và kho tri thức nghiệp vụ, thay vì là công cụ độc lập.","Nhân sự trực tiếp vận hành là nguồn quan trọng để xác định nhu cầu và phát triển ứng dụng AI phù hợp thực tế.","Lộ trình hiệu quả: tạo đồng thuận → khuyến khích nhân sự thử nghiệm → nhân rộng ứng dụng đã chứng minh hiệu quả.","Hệ sinh thái khách sạn – du lịch mở ra hướng kết nối về công nghệ vận hành, chuỗi cung ứng, du lịch và phát triển bền vững."],
    lessons:["<b>Phát triển từ bài toán thực tế:</b> làm việc trực tiếp với người dùng để xác định điểm nghẽn vận hành trước khi xây dựng sản phẩm AI.","<b>Tập trung dữ liệu và tri thức chuyên ngành:</b> tận dụng mô hình AI có sẵn, đầu tư vào dữ liệu và quy trình đặc thù.","<b>Chứng minh hiệu quả trước khi mở rộng:</b> thử nghiệm quy mô nhỏ, đo mức tiết kiệm chi phí, thời gian, năng suất; chỉ nhân rộng khi có kết quả thực tế.","<b>Hợp tác với hệ sinh thái khách sạn:</b> quản lý vận hành, đào tạo nhân sự, chuỗi cung ứng, giảm nhựa dùng một lần, tái chế; cơ hội mở rộng khi Jin Jiang vào Việt Nam và Đông Nam Á."],
    photo:"photos/day2-jinjiang.jpg"},
   {id:"alibaba", day:2, date:"19/10", name:"Alibaba Thượng Hải · Alibaba Cloud", short:"Alibaba Cloud", ini:"AC", city:"Thượng Hải", tags:["Cloud","AI mã nguồn mở"],
-   addr:"Area D, Xuhui Riverside, No. 8 Longqi Road, Xuhui District", x:880, y:600,
+   addr:"Area D, Xuhui Riverside, No. 8 Longqi Road, Xuhui District", x:885, y:628,
    people:"Jerry Zhao · Murray Yu · Nguyễn Minh Hiếu (Alibaba Cloud Vietnam)",
    stats:[["300+","mô hình mã nguồn mở Qwen & Wan"],["600M+","lượt tải xuống"],["170K+","mô hình phái sinh"]],
    recap:["Hệ sinh thái AI toàn diện: hạ tầng cloud, mô hình nền tảng, công cụ phát triển, ứng dụng; mô hình mở giúp tiếp cận công nghệ với chi phí linh hoạt.","AI chuyển từ hỗ trợ tác vụ đơn lẻ sang AI Agent thực hiện quy trình, hướng tới kết quả cụ thể.","Dữ liệu chuyên ngành, tích hợp hệ thống và tuân thủ tại thị trường sở tại là yếu tố then chốt để thương mại hóa giải pháp AI."],
@@ -404,26 +448,61 @@ function petals(n=28){
     p.style.animationDuration=(3+Math.random()*2)+"s"; fx().appendChild(p); setTimeout(()=>p.remove(),5200); }, i*120); }
 }
 
+
+/* ---------- Scenery (procedural pastel city) ---------- */
+function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; } }
+function scenery(){
+  const rnd=mulberry32(2026);
+  const P=$("#scenery-parks"), B=$("#scenery-blocks"), T=$("#scenery-trees"), Rd=$("#scenery-roads");
+  const avoid=STOPS.map(s=>[s.x,s.y]);
+  const parks=[[330,470,180,125],[620,235,115,85],[820,430,120,170],[985,590,70,55],[470,635,90,45],[250,610,60,40]];
+  parks.forEach(([x,y,rx,ry])=>P.appendChild(svgEl("ellipse",{cx:x,cy:y,rx,ry,fill:"#D8EBC9"})));
+  const pal=["#EAEFF7","#F7E9DB","#E6F1E3","#FAEEDC","#ECE6F5","#F9E6E6","#E3F0F4","#F3EFE0"];
+  const zones=[[205,365,480,640],[525,150,700,300],[765,130,880,660],[945,385,1000,660]];
+  zones.forEach(([x0,y0,x1,y1])=>{ for(let y=y0;y<y1-18;y+=27){ for(let x=x0;x<x1-22;x+=33){
+    if(rnd()<.2) continue; if(avoid.some(([ax,ay])=>Math.hypot(ax-x-11,ay-y-9)<52)) continue;
+    const w=20+rnd()*9,h=13+rnd()*8; B.appendChild(svgEl("rect",{x,y,width:w,height:h,rx:3,fill:pal[(rnd()*pal.length)|0],stroke:"#fff","stroke-width":1.2})); } } });
+  const roads=["M200,430 H500","M200,520 H500","M330,360 V640","M430,360 V640","M760,250 H880","M760,400 H880","M760,560 H880","M800,130 V660","M860,130 V660","M950,400 V660","M520,230 H700","M610,150 V300","M420,520 C 560,520 640,470 740,450 C 820,435 860,400 900,400"];
+  roads.forEach(d=>{ Rd.appendChild(svgEl("path",{d,fill:"none",stroke:"#D9E0E9","stroke-width":12,"stroke-linecap":"round"})); });
+  roads.forEach(d=>{ Rd.appendChild(svgEl("path",{d,fill:"none",stroke:"#fff","stroke-width":8,"stroke-linecap":"round"})); });
+  parks.forEach(([x,y,rx,ry])=>{ for(let i=0;i<26;i++){ const a=rnd()*6.283,r=Math.sqrt(rnd()); const tx=x+Math.cos(a)*rx*r*.92, ty=y+Math.sin(a)*ry*r*.92;
+    if(avoid.some(([ax,ay])=>Math.hypot(ax-tx,ay-ty)<58)) continue;
+    const g=svgEl("g",{transform:`translate(${tx.toFixed(1)} ${ty.toFixed(1)})`}); const rr=4.5+rnd()*4;
+    g.appendChild(svgEl("rect",{x:-1,y:1,width:2,height:rr,fill:"#8A6A4A"})); g.appendChild(svgEl("circle",{cy:-rr*.4,r:rr,fill:rnd()<.5?"#8FCB95":"#6DB97A",stroke:"#4E9A5D","stroke-width":1}));
+    T.appendChild(g); } });
+}
+
 /* ---------- Build map ---------- */
 let cur = -1, moving = false, visited = new Set(), legPaths = [], stopEls = [];
 function legD(a,b){ const mx=(a.x+b.x)/2,my=(a.y+b.y)/2,dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1,k=Math.min(60,len*.18);
   return `M${a.x},${a.y} Q${mx-dy/len*k},${my+dx/len*k} ${b.x},${b.y}`; }
 (function build(){
   const R=$("#routes"), S=$("#stops");
-  for(let i=0;i<STOPS.length-1;i++){ const p=svgEl("path",{d:legD(STOPS[i],STOPS[i+1]),class:"route"}); R.appendChild(p); legPaths.push(p); }
+  scenery();
+  for(let i=0;i<STOPS.length-1;i++){ const d=legD(STOPS[i],STOPS[i+1]); const g=svgEl("g",{class:"leg"});
+    g.appendChild(svgEl("path",{d,class:"ro"})); const base=svgEl("path",{d,class:"rb"}); g.appendChild(base); g.appendChild(svgEl("path",{d,class:"rc"}));
+    R.appendChild(g); legPaths.push(base); }
+  const EMO={pvg:"✈️",tlsq:"🏛️",jinjiang:"🏨",alibaba:"☁️",xjtlu:"🎓",sip:"🏙️",pingjiang:"🏮",block71:"🧪",iflytek:"🎤",tusstar:"🚀",zhida:"🔌",pnp:"🔗"};
+  const DAYCOL={1:"#F6A6B8",2:"#F7C325",3:"#9FC4EC",4:"#A8D8A0",5:"#D9C3EC",6:"#F8C8A0"};
+  const CL=$("#checklist");
   STOPS.forEach((s,i)=>{
     const g=svgEl("g",{class:"stop hidden"+(s.special?" special":""),transform:`translate(${s.x} ${s.y})`,tabindex:"0",role:"button","aria-label":`${s.short} · Ngày ${s.day}`});
-    g.appendChild(svgEl("circle",{r:22,class:"ring"}));
-    const ini=svgEl("text",{class:"ini",y:4}); ini.textContent=s.ini; g.appendChild(ini);
-    g.appendChild(svgEl("circle",{cx:16,cy:-16,r:9,class:"numbg"}));
-    const n=svgEl("text",{class:"num",x:16,y:-13}); n.textContent="D"+s.day; g.appendChild(n);
-    const ck=svgEl("g",{class:"check",transform:"translate(-16 -16)"}); ck.appendChild(svgEl("circle",{r:8,fill:"#1E9E5A"})); ck.appendChild(svgEl("path",{d:"M-4,0 L-1,3 L4,-3",fill:"none",stroke:"#fff","stroke-width":2,"stroke-linecap":"round"})); g.appendChild(ck);
-    const right=s.x<1050;
-    const lbl=svgEl("text",{class:"lbl",x:right?28:-28,y:4,"text-anchor":right?"start":"end"}); lbl.textContent=s.short; g.appendChild(lbl);
-    const sub=svgEl("text",{class:"sub",x:right?28:-28,y:18,"text-anchor":right?"start":"end"}); sub.textContent=s.date+(s.special?" · 🌸 20/10":""); g.appendChild(sub);
+    g.appendChild(svgEl("ellipse",{cy:30,rx:22,ry:5,fill:"#1B2A5B",opacity:".12"}));
+    g.appendChild(svgEl("circle",{r:33,class:"halo",fill:DAYCOL[s.day]}));
+    g.appendChild(svgEl("circle",{r:27,class:"ring",stroke:DAYCOL[s.day]}));
+    const em=svgEl("text",{class:"emo",y:9,"text-anchor":"middle"}); em.textContent=EMO[s.id]||s.ini; g.appendChild(em);
+    g.appendChild(svgEl("circle",{cx:-23,cy:-23,r:10,class:"numbg"}));
+    const n=svgEl("text",{class:"num",x:-23,y:-19.5}); n.textContent=i+1; g.appendChild(n);
+    const ck=svgEl("g",{class:"check",transform:"translate(23 -23)"}); ck.appendChild(svgEl("circle",{r:9,fill:"#1E9E5A",stroke:"#fff","stroke-width":2})); ck.appendChild(svgEl("path",{d:"M-4,0 L-1,3 L4,-3",fill:"none",stroke:"#fff","stroke-width":2,"stroke-linecap":"round"})); g.appendChild(ck);
+    const w=s.short.length*6.8+36, ly=38;
+    g.appendChild(svgEl("rect",{x:-w/2,y:ly,width:w,height:22,rx:11,class:"pillbg"}));
+    g.appendChild(svgEl("circle",{cx:-w/2+13,cy:ly+11,r:6.5,fill:"#F08A24"})); g.appendChild(svgEl("circle",{cx:-w/2+13,cy:ly+11,r:2.4,fill:"#fff"}));
+    const lbl=svgEl("text",{class:"lbl",x:-w/2+24,y:ly+15}); lbl.textContent=s.short; g.appendChild(lbl);
+    const sub=svgEl("text",{class:"sub",y:ly+34,"text-anchor":"middle"}); sub.textContent="Ngày "+s.day+" · "+s.date+(s.special?" · 🌸":""); g.appendChild(sub);
     g.addEventListener("click",()=>goTo(i));
     g.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();goTo(i);} });
     S.appendChild(g); stopEls.push(g);
+    const li=document.createElement("li"); li.dataset.i=i; li.innerHTML=`<span class="cb"></span><span class="nm">${s.short}</span><span class="dy">N${s.day}</span>`; li.addEventListener("click",()=>goTo(i)); CL.appendChild(li);
   });
   const D=$("#days");
   DAYS.forEach(d=>{ const b=document.createElement("button"); b.className="day"+(d.d===3?" special":""); b.setAttribute("role","tab"); b.dataset.day=d.d;
@@ -473,7 +552,7 @@ function placeBus(x,y,angle){ $("#bus").setAttribute("transform",`translate(${x}
 function animateLeg(from,to){
   return new Promise(res=>{
     const fwd=to>from, idx=fwd?from:to, path=legPaths[idx], L=path.getTotalLength();
-    path.classList.add("live");
+    path.parentNode.classList.add("live");
     const t0=performance.now(), dur=REDUCED?10:LEG_MS; let lastPuff=0, rot=0;
     (function f(now){
       const t=Math.min(1,(now-t0)/dur), u=ease(t), d=fwd?u*L:(1-u)*L;
@@ -485,7 +564,7 @@ function animateLeg(from,to){
       $("#busBob").setAttribute("transform",`translate(0 ${Math.sin(now/45)*1.6*speed}) rotate(${Math.sin(now/90)*2*speed})`);
       rot+=speed*14; $("#w1").setAttribute("transform",`translate(-13 14) rotate(${rot})`); $("#w2").setAttribute("transform",`translate(13 14) rotate(${rot})`);
       if(now-lastPuff>110&&speed>.2){ lastPuff=now; const dl=Math.hypot(q.x-p.x,q.y-p.y)||1; puff(p.x-(q.x-p.x)/dl*26, p.y-(q.y-p.y)/dl*26+8); }
-      if(t<1) requestAnimationFrame(f); else { path.classList.remove("live"); res(); }
+      if(t<1) requestAnimationFrame(f); else { path.parentNode.classList.remove("live"); res(); }
     })(t0);
   });
 }
@@ -501,7 +580,7 @@ async function goTo(target){
     stopEls[next].classList.add("next");
     await animateLeg(cur,next);
     cur=next; visited.add(cur); stopEls[cur].classList.remove("next");
-    if(step>0) legPaths[cur-1].classList.add("done");
+    if(step>0) legPaths[cur-1].parentNode.classList.add("done");
     if(cur!==target){ stopEls[cur].classList.add("hop"); ripple(STOPS[cur].x,STOPS[cur].y); setTimeout(()=>stopEls[cur].classList.remove("hop"),600); await wait(180); }
   }
   moving=false; $("#status").classList.remove("moving");
@@ -517,6 +596,8 @@ function arrive(i){
   $("#statusTxt").textContent=`📍 ${s.short} · Ngày ${s.day} (${s.date})`;
   stopEls.forEach((g,k)=>{ g.classList.toggle("active",k===i); g.classList.toggle("visited",visited.has(k)&&k!==i); g.classList.toggle("next",k===i+1); });
   document.querySelectorAll(".day").forEach(b=>{ const d=+b.dataset.day; b.classList.toggle("active",d===s.day); b.classList.toggle("visited",d<s.day); });
+  document.querySelectorAll("#checklist li").forEach((li,k)=>{ li.classList.toggle("done",visited.has(k)&&k!==i); li.classList.toggle("cur",k===i); });
+  $("#progNum").textContent=visited.size+"/"+STOPS.length;
   renderPanel(i); camFocus(s); setTimeout(openPanel,350);
 }
 
